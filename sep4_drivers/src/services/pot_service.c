@@ -4,10 +4,14 @@
 //#include "controllers/mqtt_controller.h"
 #include "services/mqtt_service.h"
 #include "controllers/network_controller.h"
+#include "controllers/sensor_controller.h"
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
 #include "services/device_config.h"
+
+#define JSON_BUF_SIZE 512
+static char _json_buf[JSON_BUF_SIZE];
 
 static bool telemetry_enabled = false;
 
@@ -24,7 +28,7 @@ void pot_service_handle_activate(const char *topic, const uint8_t *payload, uint
 
     const char *ack = "{\"status\":\"ok\"}";
 
-    unsigned char buffer[128];
+    unsigned char buffer[JSON_BUF_SIZE];
 
     char response_topic[64];
     snprintf(response_topic, sizeof(response_topic), "%s/ok", topic);
@@ -39,10 +43,65 @@ void pot_service_handle_deactivate(const char *topic, const uint8_t *payload, ui
 
     const char *ack = "{\"status\":\"ok\"}";
 
-    unsigned char buffer[128];
+    unsigned char buffer[JSON_BUF_SIZE];
 
     char response_topic[64];
     snprintf(response_topic, sizeof(response_topic), "%s/ok", topic);
 
     mqtt_service_publish(response_topic, (const uint8_t *)ack, buffer, sizeof(buffer));
+}
+
+bool pot_service_handle_get_pot_data(const char *topic, const uint8_t *payload, uint16_t len) {
+    logger_service_log("Pot data requested");
+
+    sensor_controller_poll();
+    uint8_t hum_i = sensor_controller_get_humidity_integer();
+    uint8_t hum_d = sensor_controller_get_humidity_decimal();
+    uint8_t tmp_i = sensor_controller_get_temperature_integer();
+    uint8_t tmp_d = sensor_controller_get_temperature_decimal();
+    uint16_t light = sensor_controller_get_light();
+    uint8_t soil   = sensor_controller_get_soil();
+
+    logger_service_log("Pot data!!!!: %u.%u %u.%u %u %u\n", tmp_i, tmp_d, hum_i, hum_d, light, soil);
+
+    // Format JSON payload without floats
+    //    e.g. {"temperature":27.8,"humidity":33.0,"light":502,"soil":123}
+    int jlen = snprintf(_json_buf, sizeof(_json_buf),
+        "{\"temperature_celsius\":%u.%u,"
+        "\"air_humidity_percentage\":%u.%u,"
+        "\"light_intensity\":%u,"
+        "\"soil_humidity\":%u,"
+        "\"plant_pot_id\":\"%s\","
+        "\"water_tank_capacity_ml\":%u,"
+        "\"water_level_percentage\":%u}",
+        (unsigned)tmp_i, (unsigned)tmp_d,
+        (unsigned)hum_i, (unsigned)hum_d,
+        (unsigned)light,
+        (unsigned)soil, DEVICE_ID, 42, 42
+    );
+
+    logger_service_log("Pot data is built...\n");
+
+    if (jlen <= 0 || jlen >= sizeof(_json_buf)) {
+        return false;
+    }
+    logger_service_log("The length is ok...\n");
+
+
+    unsigned char buffer[JSON_BUF_SIZE];
+
+    logger_service_log("Pot JSON payload: %s\n", _json_buf);
+
+    char response_topic[64];
+    snprintf(response_topic, sizeof(response_topic), "%s/ok", topic);
+
+    WIFI_ERROR_MESSAGE_t result = mqtt_service_publish(response_topic, (unsigned char *)_json_buf, buffer, sizeof(buffer));
+
+    if (result != WIFI_OK) {
+        logger_service_log("Pot data publish failed\n");
+        return false;
+    }
+
+    logger_service_log("Pot data published successfully\n");
+    return true;
 }

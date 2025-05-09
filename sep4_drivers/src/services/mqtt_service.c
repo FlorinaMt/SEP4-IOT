@@ -74,6 +74,11 @@ void mqtt_event_cb()
         logger_service_log("Command received: Deactivate pot\n");
         pot_service_handle_deactivate(topic, payload, payloadlen);
       }
+      else if (strcmp(topic, MQTT_TOPIC_GET_DATA) == 0)
+      {
+        logger_service_log("Command received: Get pot data\n");
+        pot_service_handle_get_pot_data(topic, payload, payloadlen);
+      }
       // TODO: add more handler functions here
       else
       {
