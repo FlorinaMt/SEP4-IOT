@@ -64,20 +64,24 @@ bool pot_service_handle_get_pot_data(const char *topic, const uint8_t *payload, 
 
     logger_service_log("Pot data!!!!: %u.%u %u.%u %u %u\n", tmp_i, tmp_d, hum_i, hum_d, light, soil);
 
+    uint32_t light_lux= (light * 10000) / 1023;
+    uint8_t soil_percentage = (soil * 100) / 1023;
+
     // Format JSON payload without floats
     //    e.g. {"temperature":27.8,"humidity":33.0,"light":502,"soil":123}
     int jlen = snprintf(_json_buf, sizeof(_json_buf),
         "{\"temperature_celsius\":%u.%u,"
         "\"air_humidity_percentage\":%u.%u,"
-        "\"light_intensity\":%u,"
-        "\"soil_humidity\":%u,"
+        "\"light_intensity_lux\":%u,"
+        "\"soil_humidity_percentage\":%u,"
         "\"plant_pot_id\":\"%s\","
         "\"water_tank_capacity_ml\":%u,"
-        "\"water_level_percentage\":%u}",
+        "\"water_level_percentage\":%u,"
+        "\"status\":\"ok\"}",
         (unsigned)tmp_i, (unsigned)tmp_d,
         (unsigned)hum_i, (unsigned)hum_d,
-        (unsigned)light,
-        (unsigned)soil, DEVICE_ID, 42, 42
+        (unsigned)light_lux,
+        (unsigned)soil_percentage, DEVICE_ID, 42, 42
     );
 
     logger_service_log("Pot data is built...\n");

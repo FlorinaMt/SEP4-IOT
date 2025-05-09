@@ -93,11 +93,11 @@ void mqtt_event_cb()
   }
 
   case 9: // MQTT SUBACK
-    logger_service_log("RECEIVED SUBACK\n");
+    //logger_service_log("RECEIVED SUBACK\n");
     break;
 
   case 13: // MQTT PINGRESP
-    logger_service_log("RECEIVED PINGRESP\n");
+    //logger_service_log("RECEIVED PINGRESP\n");
     break;
 
   default: // Not interesting
