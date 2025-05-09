@@ -17,7 +17,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <wifi.h>
-#include "services/device_config.h"
+#include "config/device_config.h"
+#include "config/topics_config.h"
+#include "config/watering_config.h"
 
 int main(void)
 {
@@ -34,6 +36,7 @@ int main(void)
 
     _delay_ms(5000);
     subscribe_to_all_topics();
+    load_watering_config(); // Load watering settings from EEPROM
 
     // periodic_task_init_a(loop, 2000);
     // Keep-alive logic

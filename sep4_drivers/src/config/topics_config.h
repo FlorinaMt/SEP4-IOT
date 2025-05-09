@@ -1,9 +1,8 @@
-// device_config.h
-#ifndef DEVICE_CONFIG_H
-#define DEVICE_CONFIG_H
+// topics_config.h
+#ifndef TOPICS_CONFIG_H
+#define TOPICS_CONFIG_H
 
-
-#define DEVICE_ID "pot_1"
+#include "device_config.h"
 
 #define NUM_TOPICS 3
 #define MQTT_TOPIC_ACTIVATE "/" DEVICE_ID "/activate" // => /pot_1/activate
@@ -16,4 +15,4 @@
 extern const char *mqtt_topic_strings[NUM_TOPICS];
 
 //TODO: add more topics here (in both .c and .h files) and increment NUM_TOPICS when doing so
-#endif // DEVICE_CONFIG_H
+#endif // TOPICS_CONFIG_H

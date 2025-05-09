@@ -1,4 +1,4 @@
-#include "device_config.h"
+#include "topics_config.h"
 
 const char *mqtt_topic_strings[NUM_TOPICS] = {
     MQTT_TOPIC_ACTIVATE,
