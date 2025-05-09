@@ -4,7 +4,8 @@
 #include "services/logger_service.h"
 #include "services/mqtt_service.h"
 #include "services/pot_service.h"
-#include "services/device_config.h"
+#include "config/device_config.h"
+#include "config/topics_config.h"
 
 char callback_buff[256];
 
